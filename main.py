@@ -2,9 +2,17 @@ from fastapi import FastAPI
 
 from app.endpoints.eps import router as eps_router
 from middleware import XmlRpcMiddleware
+from settings import settings
 
 
-app = FastAPI()
+def get_application() -> FastAPI:
+    application = FastAPI()
 
-app.include_router(eps_router)
-app.add_middleware(XmlRpcMiddleware)
+    application.include_router(eps_router)
+
+    application.add_middleware(XmlRpcMiddleware)
+
+    return application
+
+
+app = get_application()

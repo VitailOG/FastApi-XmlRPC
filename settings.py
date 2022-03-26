@@ -1,8 +1,16 @@
+from functools import lru_cache
+
 from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
-    pass
+    API_PREFIX: str = "/api"
+    API_VERSION_PREFIX: str = "/v1"
 
 
-settings = Settings()
+@lru_cache()
+def cached_settings():
+    return Settings()
+
+
+settings = cached_settings()
