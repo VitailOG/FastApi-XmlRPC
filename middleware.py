@@ -44,14 +44,14 @@ class XmlRpcMiddleware:
 
     async def send_with_xml_rpc(self, message: dict):
         print('send')
-        if message.get('type') == 'http.response.start':
-            return await self.send(message)
-
-        if message.get('body') is not None:
-            res = XMLHandler().build_xml(await XMLHandler().format_success(json.loads(message.get('body'))))
-            element = XML(res)
-            indent(element)
-            print(tostring(element, encoding='unicode'))
+        match message.get('type'):
+            case 'http.response.start':
+                return await self.send(message)
+            case 'http.response.body':
+                res = XMLHandler().build_xml(await XMLHandler().format_success(json.loads(message.get('body'))))
+                element = XML(res)
+                indent(element)
+                print(tostring(element, encoding='unicode'))
 
         await self.send(message)
 
