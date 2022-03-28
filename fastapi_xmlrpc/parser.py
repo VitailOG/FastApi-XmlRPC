@@ -1,6 +1,6 @@
 import asyncio
 
-from aiohttp_xmlrpc.common import schema, py2xml
+from aiohttp_xmlrpc.common import schema, py2xml, xml2py
 from lxml import etree
 
 
@@ -10,10 +10,22 @@ class XMLHandler:
         self.xml_body = xml_body
         self.THREAD_POOL_EXECUTOR = None
 
-    async def handle(self):
+    async def handle(self, return_name_endpoint: bool = True):
         xml_request = await self.parse_body()
+
         full_method_name = xml_request.xpath("//methodName[1]")[0].text
-        return full_method_name
+
+        if return_name_endpoint:
+            return full_method_name
+
+        args = list(
+                map(
+                    xml2py,
+                    xml_request.xpath("//params/param/value")
+                )
+            )
+
+        return args
 
     async def parse_body(self):
         loop = asyncio.get_event_loop()

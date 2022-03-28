@@ -10,7 +10,10 @@ def get_application() -> FastAPI:
 
     application.include_router(eps_router)
 
-    application.add_middleware(XmlRpcMiddleware)
+    application.add_middleware(
+        XmlRpcMiddleware,
+        access_url="/rpc/v1/"
+    )
 
     return application
 
