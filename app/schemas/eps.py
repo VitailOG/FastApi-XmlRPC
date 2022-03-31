@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 
 
-class Test(BaseModel):
+class TestSchema(BaseModel):
     id: int
     name: str
 
 
-class Test2(BaseModel):
-    age: int
+class TestResponseSchema(BaseModel):
+    name: str

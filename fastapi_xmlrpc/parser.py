@@ -10,13 +10,11 @@ class XMLHandler:
         self.xml_body = xml_body
         self.THREAD_POOL_EXECUTOR = None
 
-    async def handle(self, return_name_endpoint: bool = True):
+    async def handle(self):
+        print('handler')
         xml_request = await self.parse_body()
 
         full_method_name = xml_request.xpath("//methodName[1]")[0].text
-
-        if return_name_endpoint:
-            return full_method_name
 
         args = list(
                 map(
@@ -25,7 +23,7 @@ class XMLHandler:
                 )
             )
 
-        return args
+        return full_method_name, args
 
     async def parse_body(self):
         loop = asyncio.get_event_loop()
