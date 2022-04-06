@@ -2,7 +2,7 @@ import json
 
 from starlette.types import Scope, Receive, Send, Message
 from starlette.datastructures import MutableHeaders
-from fastapi.exceptions import HTTPException
+from fastapi import exceptions, status
 
 from fastapi_xmlrpc.parser import XMLHandler
 
@@ -23,9 +23,8 @@ class XmlRpcMiddleware:
         if not scope['path'] == self.access_url:
             return await self.app(scope, receive, send)
         if 'xml' not in self.headers['Content-Type']:
-            raise HTTPException(status_code=402)
+            raise exceptions.HTTPException(status_code=402)
 
-        self.scope = scope
         self.receive = receive
         self.send = send
         scope = await self.scope_with_xml_rpc(scope=scope.copy())
@@ -51,7 +50,11 @@ class XmlRpcMiddleware:
                 self.initial_message = message
 
             case 'http.response.body':
-                body = XMLHandler().build_xml(await XMLHandler().format_success(json.loads(message['body'])))
+                if self.initial_message['status'] == status.HTTP_200_OK:
+                    body = XMLHandler().build_xml(await XMLHandler().format_success(json.loads(message['body'])))
+                else:
+                    decode_data = message['body'].decode()
+                    body = json.loads(decode_data)['errors'].encode()
 
                 headers = MutableHeaders(raw=self.initial_message["headers"])
                 headers["Content-Type"] = "application/xml"

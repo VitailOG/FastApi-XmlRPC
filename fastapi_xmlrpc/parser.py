@@ -1,6 +1,7 @@
 import asyncio
 
 from aiohttp_xmlrpc.common import schema, py2xml, xml2py
+
 from lxml import etree
 
 
@@ -11,7 +12,7 @@ class XMLHandler:
         self.THREAD_POOL_EXECUTOR = None
 
     async def handle(self):
-        print('handler')
+
         xml_request = await self.parse_body()
 
         full_method_name = xml_request.xpath("//methodName[1]")[0].text
