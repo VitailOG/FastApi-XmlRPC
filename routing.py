@@ -70,7 +70,7 @@ class XmlRpcAPIRouter(APIRouter):
             response_description=response_description,
             responses=responses,
             deprecated=deprecated,
-            methods=["GET"],
+            methods=["POST"],
             operation_id=operation_id,
             response_model_include=response_model_include,
             response_model_exclude=response_model_exclude,

@@ -1,4 +1,4 @@
-import json
+import orjson
 
 from starlette.types import Scope, Receive, Send, Message
 from starlette.datastructures import MutableHeaders
@@ -33,7 +33,7 @@ class XmlRpcMiddleware:
 
     async def receive_with_xml_rpc(self):
         assert self.message["type"] == "http.request"
-        body = json.dumps(*self.args).encode()
+        body = orjson.dumps(*self.args)
         self.message['body'] = body
         return self.message
 
@@ -51,10 +51,10 @@ class XmlRpcMiddleware:
 
             case 'http.response.body':
                 if self.initial_message['status'] == status.HTTP_200_OK:
-                    body = XMLHandler().build_xml(await XMLHandler().format_success(json.loads(message['body'])))
+                    body = XMLHandler().build_xml(await XMLHandler().format_success(orjson.loads(message['body'])))
                 else:
                     decode_data = message['body'].decode()
-                    body = json.loads(decode_data)['errors'].encode()
+                    body = orjson.loads(decode_data)['errors'].encode()
 
                 headers = MutableHeaders(raw=self.initial_message["headers"])
                 headers["Content-Type"] = "application/xml"

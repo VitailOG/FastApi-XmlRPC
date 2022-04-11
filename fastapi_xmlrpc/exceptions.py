@@ -5,7 +5,7 @@ from fastapi.exceptions import HTTPException
 
 __all__ = (
     "XMLRPCError", "ApplicationError", "InvalidCharacterError", "ParseError", "ServerError",
-    "SystemError", "TransportError", "UnsupportedEncodingError", "HttpError"
+    "SystemError", "TransportError", "UnsupportedEncodingError"
 )
 
 
@@ -26,10 +26,6 @@ class XMLRPCError(Exception):
 
 class ParseError(XMLRPCError):
     code = -32700
-
-
-class HttpError(XMLRPCError):  #
-    code = 403
 
 
 class UnsupportedEncodingError(ParseError):
@@ -71,8 +67,7 @@ class TransportError(XMLRPCError):
 __EXCEPTION_CODES = {
     -32000: Exception,
 
-    HttpError.code: HttpError,  # custom http exception
-    402: HTTPException,  # custom http exception
+    # 402: HTTPException,  # custom http exception
 
     XMLRPCError.code: XMLRPCError,
     ParseError.code: ParseError,

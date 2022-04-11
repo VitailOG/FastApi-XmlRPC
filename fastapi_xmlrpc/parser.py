@@ -12,7 +12,6 @@ class XMLHandler:
         self.THREAD_POOL_EXECUTOR = None
 
     async def handle(self):
-
         xml_request = await self.parse_body()
 
         full_method_name = xml_request.xpath("//methodName[1]")[0].text

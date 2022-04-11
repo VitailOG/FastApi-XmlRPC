@@ -1,6 +1,5 @@
 from fastapi import Body, Depends, exceptions
 from routing import XmlRpcAPIRouter
-from fastapi_xmlrpc.exceptions import HttpError
 from app.main.schemas.eps import TestSchema, TestResponseSchema
 from app.main.endpoints.dependencies.common import test
 

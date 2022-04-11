@@ -3,7 +3,6 @@ from starlette.responses import JSONResponse
 from fastapi.exceptions import HTTPException
 
 from fastapi_xmlrpc.parser import XMLHandler
-from fastapi_xmlrpc.exceptions import HttpError
 
 
 async def global_error_handler(

@@ -40,6 +40,7 @@ uvloop = "0.16.0"
 watchgod = "0.8.1"
 websockets = "10.2"
 yarl = "1.7.2"
+orjson = "^3.6.7"
 
 [tool.poetry.dev-dependencies]
 
