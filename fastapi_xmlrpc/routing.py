@@ -21,9 +21,6 @@ from starlette.responses import JSONResponse, Response
 from starlette.routing import BaseRoute
 
 
-app = FastAPI()
-
-
 class XmlRpcAPIRouter(APIRouter):
 
     def xml_rpc(

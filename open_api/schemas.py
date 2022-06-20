@@ -49,6 +49,7 @@ IntT = create_schema("IntT", int=(int, ...))
 StrT = create_schema("StrT", string=(str, ...))
 BoolT = create_schema("BoolT", boolean=(bool, ...))
 DoubleT = create_schema("DoubleT", double=(Decimal, ...))
+FloatT = create_schema("FloatT", float=(float, ...))
 
 
 class BaseGen(GenericModel, Generic[ValueType]):

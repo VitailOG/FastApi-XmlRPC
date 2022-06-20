@@ -1,3 +1,4 @@
+from decimal import Decimal
 from uuid import uuid4
 from types import GenericAlias
 from typing import (
@@ -13,6 +14,8 @@ from .schemas import (
     IntT,
     StrT,
     BoolT,
+    FloatT,
+    DoubleT,
     create_schema,
     XMLRPCValue,
     XMLRPCArrayT,
@@ -30,6 +33,8 @@ class SchemaGenerator:
         int: IntT,
         str: StrT,
         bool: BoolT,
+        float: FloatT,
+        Decimal: DoubleT
     }
 
     IS_OBJECT_INSTANCE = {
@@ -89,7 +94,7 @@ class SchemaGenerator:
         members = []
         for field, attribute in obj.__fields__.items():
             data = create_schema(
-                f'data_{uuid4()}',
+                f'element_{uuid4()}',
                 name=(str, field),
                 value=(self.create_schemas(attribute.outer_type_), ...)
             )
@@ -102,7 +107,7 @@ class SchemaGenerator:
 
         struct_s = create_schema(
             f'struct_{uuid4()}',
-            member=(member, ...)
+            struct=(member, ...)
         )
 
         return struct_s

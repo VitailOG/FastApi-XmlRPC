@@ -1,64 +1,24 @@
-from typing import Dict, Any
-
-from fastapi import FastAPI, routing
-from fastapi.openapi.utils import get_openapi
-
-from open_api.schemas import default_ref_template
-
-app = FastAPI()
-
-
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-
-    definitions: Dict[str, Dict[str, Any]] = {}
-
-    for route in app.routes:
-        if isinstance(route, routing.APIRoute) and hasattr(route, "openapi_extra"):
-            try:
-                for content in route.openapi_extra["requestBody"]["content"].values():
-                    definitions |= content["schema"].pop("definitions", {})
-                    definitions[content["schema"]["title"]] = content["schema"]
-                    content["schema"] = {"$ref": default_ref_template.format(model=content["schema"]["title"])}
-            except KeyError:
-                continue
-
-    openapi_schema = get_openapi(
-        title="Custom title",
-        version="2.5.0",
-        description="This is a very custom OpenAPI schema",
-        routes=app.routes
-    )
-
-    openapi_schema.setdefault("components", {}).setdefault("schemas", {}).update(definitions)
-
-    app.openapi_schema = openapi_schema
-
-    return app.openapi_schema
-
-
-@app.post(
-    "/item/create",
-    openapi_extra={
-        "requestBody": {
-            "content": {
-                "application/xml": {
-                    # "schema": SchemaGenerator()(
-                    #     [
-                    #         list[Union[int, str]]
-                    #     ]
-                    # ).schema(ref_template="#/components/schemas/{model}")
-                }
-            },
-            "required": True,
-        }
-    }
-)
-async def test():
-    return {}
-
-app.openapi = custom_openapi
+# @app.post(
+#     "/item/create",
+#     openapi_extra={
+#         "requestBody": {
+#             "content": {
+#                 "application/xml": {
+#                     "schema": SchemaGenerator()(
+#                         [
+#                             list[Union[int, str]]
+#                         ]
+#                     ).schema(ref_template="#/components/schemas/{model}")
+#                 }
+#             },
+#             "required": True,
+#         }
+#     }
+# )
+# async def test():
+#     return {}
+#
+# app.openapi = custom_openapi
 
 
 

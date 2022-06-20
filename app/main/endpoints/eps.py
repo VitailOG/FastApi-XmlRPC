@@ -1,20 +1,38 @@
-from fastapi import Body, Depends, exceptions
-from routing import XmlRpcAPIRouter
-from app.main.schemas.eps import TestSchema, TestResponseSchema
-from app.main.endpoints.dependencies.common import test
+from pydantic import BaseModel
+
+from fastapi_xmlrpc.routing import XmlRpcAPIRouter
+
 
 router = XmlRpcAPIRouter()
 
 
+class Test(BaseModel):
+    id: int
+    name: str
+
+
 @router.xml_rpc(
     namespace='eps',
-    function_name='test',
-    response_model=TestResponseSchema
+    function_name='test'
 )
 def test(
-        t: TestSchema
-        # f: str = Depends(test)
-        # t2: TestResponseSchema,
+        item: Test
 ):
-    raise exceptions.HTTPException(status_code=402)
-    return t.dict()
+    print('---')
+    return item.dict()
+
+
+ # openapi_extra={
+    #     "requestBody": {
+    #         "content": {
+    #             "application/xml": {
+    #                 "schema": SchemaGenerator()(
+    #                     [
+    #                         list[str]
+    #                     ]
+    #                 ).schema(ref_template="#/components/schemas/{model}")
+    #             }
+    #         },
+    #         "required": True,
+    #     }
+    # }
