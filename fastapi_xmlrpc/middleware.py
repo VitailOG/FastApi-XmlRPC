@@ -121,7 +121,6 @@ class XMLRPCResponder:
                 headers = MutableHeaders(raw=self.initial_message["headers"])
 
                 if 'xml' in headers['content-type']:
-                    print(2)
                     await self._send(message)
                     return
 
