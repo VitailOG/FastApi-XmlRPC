@@ -18,7 +18,6 @@ class Test(BaseModel):
 def test(
         item: Test
 ):
-    print('---')
     return item.dict()
 
 

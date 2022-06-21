@@ -1,9 +1,9 @@
-from typing import Callable
-
+from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import Response
+from starlette.datastructures import Headers
 
 from fastapi_xmlrpc.parser.exceptions import XMLRPCError, MethodNotFound, InvalidData
 from fastapi_xmlrpc.responses import XMLRPCResponse
@@ -26,12 +26,18 @@ async def request_validation_error_handler(
         request: Request,
         exc: RequestValidationError,
 ):
+    headers = Headers(raw=request.scope['headers'])
+
     errors = exc.errors()
     errors_str = ", ".join([f"{e['loc'][0]}: {e['msg']}" for e in errors])
     errors_num = len(errors)
-    return XMLRPCResponse(
-        InvalidData(f"Invalid data. {errors_num} {sp(errors_num, 'error', 'errors')} found. {errors_str}")
-    )
+
+    if headers.get("request-content-type"):
+        return XMLRPCResponse(
+            InvalidData(f"Invalid data. {errors_num} {sp(errors_num, 'error', 'errors')} found. {errors_str}")
+        )
+
+    return JSONResponse(content=errors)
 
 
 async def global_error_handler(

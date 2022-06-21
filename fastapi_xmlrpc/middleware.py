@@ -42,6 +42,7 @@ class XMLRPCResponder:
                 status_code=400
             )
             return await response(self.scope, receive, send)
+
         elif "xml" not in content_type_header:
             response = PlainTextResponse(
                 f"Bad Content-Type header, {content_type_header} is not supported",
@@ -117,6 +118,12 @@ class XMLRPCResponder:
                 self.initial_message = message
 
             case 'http.response.body':
+                headers = MutableHeaders(raw=self.initial_message["headers"])
+
+                if 'xml' in headers['content-type']:
+                    print(2)
+                    await self._send(message)
+                    return
 
                 try:
                     message_body_loads = orjson.loads(message['body'])
@@ -124,14 +131,16 @@ class XMLRPCResponder:
                 except orjson.JSONDecodeError:
                     body = message['body']
 
-                headers = MutableHeaders(raw=self.initial_message["headers"])
                 headers["Content-Type"] = "application/xml"
                 headers["Content-Encoding"] = "utf-8"
                 headers["Content-Length"] = str(len(body))
                 message["body"] = body
 
-                await self.send(self.initial_message)
-                await self.send(message)
+                await self._send(message)
+
+    async def _send(self, message: Message):
+        await self.send(self.initial_message)
+        await self.send(message)
 
     def _gen_endpoint_path(self, method_name: str, namespace_separator=".") -> str:
         return self.router.prefix + "/" + method_name.replace(namespace_separator, "/", 1)
@@ -155,13 +164,12 @@ class XMLRPCMiddleware:
             self.endpoints[route.path] = inspect.getfullargspec(route.endpoint).args
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
-
-        headers = MutableHeaders(raw=scope['headers'])
-        content_type_header = headers.get("Content-Type")
+        headers = MutableHeaders(raw=scope["headers"])
+        content_type_header = headers.get("Content-Type", "")
 
         #  todo
-        if 'xml' in content_type_header:
-            headers['test'] = 'xml'
+        if "xml" in content_type_header:
+            headers["request-content-type"] = "xml"
             responder = XMLRPCResponder(self.app, endpoints=self.endpoints, router=self.router)
             await responder(scope, receive, send)
             return
