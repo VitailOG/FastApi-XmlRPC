@@ -32,7 +32,7 @@ async def request_validation_error_handler(
     errors_str = ", ".join([f"{e['loc'][0]}: {e['msg']}" for e in errors])
     errors_num = len(errors)
 
-    if headers.get("request-content-type"):
+    if headers.get("original-content-type"):
         return XMLRPCResponse(
             InvalidData(f"Invalid data. {errors_num} {sp(errors_num, 'error', 'errors')} found. {errors_str}")
         )

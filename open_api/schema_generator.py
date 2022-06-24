@@ -1,26 +1,11 @@
-from decimal import Decimal
-from uuid import uuid4
 from types import GenericAlias
-from typing import (
-    Union,
-    _GenericAlias,
-    get_args,
-    get_origin, Literal
-)
+from typing import Union, get_args, get_origin, Any, _GenericAlias, Literal
+from uuid import uuid4
 
 from pydantic.main import ModelMetaclass
 
-from .schemas import (
-    IntT,
-    StrT,
-    BoolT,
-    FloatT,
-    DoubleT,
-    create_schema,
-    XMLRPCValue,
-    XMLRPCArrayT,
-    XMLRPCStructT
-)
+from open_api.schemas import XMLRPCStructT, IntT, XMLRPCArrayT, XMLRPCValue, StrT, BoolT, create_schema
+
 
 ALLOWED_TYPES = Literal[
     'array',
@@ -29,12 +14,13 @@ ALLOWED_TYPES = Literal[
 
 
 class SchemaGenerator:
+
+    DEFAULT_VALUE = {}
+
     SINGLE_TYPES = {
         int: IntT,
         str: StrT,
-        bool: BoolT,
-        float: FloatT,
-        Decimal: DoubleT
+        bool: BoolT
     }
 
     IS_OBJECT_INSTANCE = {
@@ -42,20 +28,44 @@ class SchemaGenerator:
         'struct': (ModelMetaclass, dict),
     }
 
-    def __call__(self, types: list):
+    def __call__(
+            self,
+            types: list,
+            method_name: str = None,
+            res: bool = False,
+            is_fault: bool = False
+    ):
         s = tuple([XMLRPCValue[self.create_schemas(_)] for _ in types])
+
         param = create_schema(
-            'param',
+            f'param_{uuid4()}',
             param=(list[Union[s]], ...)
         )
-        schema = create_schema(
-            'MethodCall',
-            MethodName=(str, ...),
-            params=(param, ...)
-        )
+
+        if res:
+
+            if is_fault:
+                schema = create_schema(
+                    f'methodResponse_{uuid4()}',
+                    fault=(s[0], ...)
+                )
+
+            else:
+                schema = create_schema(
+                    f'methodResponse_{uuid4()}',
+                    params=(param, ...)
+                )
+
+        else:
+            schema = create_schema(
+                f'methodCall_{uuid4()}',
+                methodName=(str, method_name),
+                params=(param, ...),
+            )
+
         return schema
 
-    def create_schemas(self, obj):
+    def create_schemas(self, obj: Any):
         if self.check_type(obj, 'struct'):
             return self.struct(obj)
 
@@ -64,8 +74,6 @@ class SchemaGenerator:
 
         if obj in self.SINGLE_TYPES:
             return self.SINGLE_TYPES[obj]
-
-        return XMLRPCArrayT[IntT]
 
     def check_type(self, obj, xml_type: ALLOWED_TYPES = 'array'):
         obj = obj() if any(obj is _ for _ in (dict, list)) else obj

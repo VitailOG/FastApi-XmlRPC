@@ -14,7 +14,6 @@ from app.errors import *
 
 
 def custom_openapi():
-
     if app.openapi_schema:
         return app.openapi_schema
 
@@ -24,10 +23,23 @@ def custom_openapi():
         if isinstance(route, routing.APIRoute) and hasattr(route, "openapi_extra"):
             try:
                 for content in route.openapi_extra["requestBody"]["content"].values():
+                    content["schema"]['xml'] = {"name": "methodResponse"}
+
                     definitions |= content["schema"].pop("definitions", {})
                     definitions[content["schema"]["title"]] = content["schema"]
                     content["schema"] = {"$ref": default_ref_template.format(model=content["schema"]["title"])}
+
+                for _ in route.responses.values():
+                    for content in _['content'].values():
+                        content["schema"]['xml'] = {"name": "methodResponse"}
+
+                        definitions |= content["schema"].pop("definitions", {})
+                        definitions[content["schema"]["title"]] = content["schema"]
+                        content["schema"] = {"$ref": default_ref_template.format(model=content["schema"]["title"])}
+
             except KeyError:
+                continue
+            except TypeError:
                 continue
 
     openapi_schema = get_openapi(
@@ -47,19 +59,20 @@ def custom_openapi():
 def get_application() -> FastAPI:
     application = FastAPI()
 
-    application.include_router(eps_router)
-
     application.add_middleware(
         XMLRPCMiddleware,
         router=eps_router
     )
-    application.openapi = custom_openapi
+
+    #  required after add_middleware
+    application.include_router(eps_router)
 
     application.add_exception_handler(RequestValidationError, request_validation_error_handler)
     application.add_exception_handler(XMLRPCError, xmlrpc_error_handler)
     application.add_exception_handler(HTTPException, http_error_handler)
     application.add_exception_handler(Exception, global_error_handler)
 
+    application.openapi = custom_openapi
     return application
 
 
