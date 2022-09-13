@@ -1,13 +1,13 @@
-from pydantic import BaseModel
+from fastapi import Body
 
 from fastapi_xmlrpc.routing import XmlRpcAPIRouter
+from fastapi_xmlrpc.schemas import XMLRPCBaseModel
 
 router = XmlRpcAPIRouter()
 
 
-class Test(BaseModel):
+class Test(XMLRPCBaseModel):
     id: int
-    name: str
 
 
 @router.xml_rpc(
@@ -15,6 +15,9 @@ class Test(BaseModel):
     function_name='test',
 )
 def test(
-        item: Test
+        # item: Test,
+        name: str = Body(...)
 ):
-    return item.dict()
+    # print(item.dict())
+    return name
+

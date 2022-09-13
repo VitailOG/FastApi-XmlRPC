@@ -33,7 +33,7 @@ class XMLRPCHandler:
     def _parse_body(xml_string: str):
         parse = etree.XMLParser(resolve_entities=False)
         root = etree.fromstring(xml_string, parse)
-        schema.assertValid(root)
+        # schema.assertValid(root)
         return root
 
     @classmethod

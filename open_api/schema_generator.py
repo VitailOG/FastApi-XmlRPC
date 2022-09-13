@@ -15,8 +15,6 @@ ALLOWED_TYPES = Literal[
 
 class SchemaGenerator:
 
-    DEFAULT_VALUE = {}
-
     SINGLE_TYPES = {
         int: IntT,
         str: StrT,

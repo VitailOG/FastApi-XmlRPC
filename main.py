@@ -72,6 +72,12 @@ def get_application() -> FastAPI:
     application.add_exception_handler(HTTPException, http_error_handler)
     application.add_exception_handler(Exception, global_error_handler)
 
+    ###################
+    application.add_exception_handler(TypeError, global_error_handler)
+    application.add_exception_handler(TabError, global_error_handler)
+    application.add_exception_handler(ZeroDivisionError, global_error_handler)
+    application.add_exception_handler(KeyError, global_error_handler)
+
     application.openapi = custom_openapi
     return application
 
