@@ -7,10 +7,7 @@ from pydantic.main import ModelMetaclass
 from open_api.schemas import XMLRPCStructT, IntT, XMLRPCArrayT, XMLRPCValue, StrT, BoolT, create_schema
 
 
-ALLOWED_TYPES = Literal[
-    'array',
-    'struct'
-]
+ALLOWED_TYPES = Literal['array', 'struct']
 
 
 class SchemaGenerator:

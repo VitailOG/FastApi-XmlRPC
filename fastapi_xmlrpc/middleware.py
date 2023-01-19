@@ -3,7 +3,7 @@ import orjson
 from inspect import (
     signature,
     getfullargspec,
-    _empty as empty
+    Parameter
 )
 from functools import wraps
 from typing import NamedTuple
@@ -151,18 +151,6 @@ class XMLRPCResponder:
         return self.router.prefix + "/" + method_name.replace(namespace_separator, "/", 1)
 
 
-def memorize(func):
-    ins = {}
-
-    @wraps(func)
-    def inner(*args, **kwargs):
-        if ins.get(func.__name__, None) is None:
-            ins[func.__name__] = func(*args, **kwargs)
-        return ins[func.__name__]
-    return inner
-
-
-@memorize
 class XMLRPCMiddleware:
     __slots__ = ("app", "router", "endpoints")
 
@@ -176,7 +164,6 @@ class XMLRPCMiddleware:
         self.endpoints = {}
 
         for route in self.router.routes:
-
             sig = signature(route.endpoint)
             args = sig.parameters
             embed = False
@@ -185,7 +172,7 @@ class XMLRPCMiddleware:
 
             request_body = [
                 arg.annotation for arg in args.values()
-                if arg.default is empty or type(arg.default) == Body
+                if arg.default is Parameter.empty or type(arg.default) == Body
             ]
 
             method_name = route.path.replace('/', '.').lstrip('.')
@@ -243,7 +230,6 @@ class XMLRPCMiddleware:
         content_type_header = headers.get("Content-Type", '')
 
         if "xml" in content_type_header:
-            headers["original-content-type"] = "xml"
             responder = XMLRPCResponder(self.app, endpoints=self.endpoints, router=self.router)
             await responder(scope, receive, send)
             return

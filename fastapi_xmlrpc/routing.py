@@ -53,11 +53,8 @@ class XmlRpcAPIRouter(APIRouter):
             generate_unique_id
         ),
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
-
-        path = f'/{namespace}/{function_name}'
-
         return self.api_route(
-            path=path,
+            path=f'/{namespace}/{function_name}',
             response_model=response_model,
             status_code=status_code,
             tags=tags,
